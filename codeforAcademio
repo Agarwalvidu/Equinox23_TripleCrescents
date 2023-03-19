@@ -1,0 +1,972 @@
+import tkinter as tk
+from tkinter import messagebox
+
+# create a Tkinter window
+window = tk.Tk()
+
+# set the window title
+window.title("WELCOME")
+
+# define a function to display the pop-up dialog
+def popup_dialog():
+    messagebox.showinfo("WELCOME", "WELCOME TO IGDTUW STUDENT RECORD MANAGEMENT PORTAL")
+
+# create a button to trigger the pop-up dialog
+button = tk.Button(window, text="MUSKURAIYE", command=popup_dialog)
+button.pack()
+
+# run the Tkinter event loop
+window.mainloop()
+
+import tkinter as tk
+from tkinter import ttk
+
+root = tk.Tk()
+root.geometry('300x200')
+root.title('Login Tab')
+
+tabControl = ttk.Notebook(root)
+
+loginTab = ttk.Frame(tabControl)
+tabControl.add(loginTab, text='Login as Admin')
+
+usernameLabel = ttk.Label(loginTab, text='Username:')
+usernameLabel.pack()
+
+usernameEntry = ttk.Entry(loginTab)
+usernameEntry.pack()
+
+passwordLabel = ttk.Label(loginTab, text='Password:')
+passwordLabel.pack()
+
+passwordEntry = ttk.Entry(loginTab, show='*')
+passwordEntry.pack()
+
+loginButton = ttk.Button(loginTab, text='Login')
+loginButton.pack()
+
+registerTab = ttk.Frame(tabControl)
+tabControl.add(registerTab, text='Register')
+
+usernameLabel = ttk.Label(registerTab, text='Username:')
+usernameLabel.pack()
+
+usernameEntry = ttk.Entry(registerTab)
+usernameEntry.pack()
+
+passwordLabel = ttk.Label(registerTab, text='create password:')
+passwordLabel.pack()
+
+passwordEntry = ttk.Entry(registerTab, show='*')
+passwordEntry.pack()
+
+passwordLabel = ttk.Label(registerTab, text='confirm password:')
+passwordLabel.pack()
+
+passwordEntry = ttk.Entry(registerTab, show='*')
+passwordEntry.pack()
+
+registerButton = ttk.Button(registerTab, text='Register')
+registerButton.pack()
+
+# Register widgets
+# ...
+
+tabControl.pack(expand=1, fill='both')
+
+root.mainloop()
+
+
+import mysql.connector
+import pickle
+
+class Student:
+    def __init__(self, roll_number, name, dob, program, branch, batch, semester, mobile_no, email_id):
+        self.roll_number = roll_number
+        self.name = name
+        self.dob = dob
+        self.program = program
+        self.branch = branch
+        self.batch = batch
+        self.semester = semester
+        self.mobile_no = mobile_no
+        self.email_id = email_id
+
+class StudentDatabase:
+    def __init__(self, host, user, password, database):
+
+        self.conn = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="jasgun_20",
+            database="student"        )
+        self.cursor = self.conn.cursor()
+
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS students (
+                roll_number INT PRIMARY KEY,
+                name VARCHAR(50) NOT NULL,
+                dob DATE NOT NULL,
+                program VARCHAR(50) NOT NULL,
+                branch VARCHAR(50) NOT NULL,
+                batch INT NOT NULL,
+                semester INT NOT NULL,
+                mobile_no VARCHAR(15) NOT NULL,
+                email_id VARCHAR(50) NOT NULL
+            );
+        """)
+
+    def create(self, student):
+        query = """
+            INSERT INTO students (
+                roll_number, name, dob, program, branch, batch, semester, mobile_no, email_id
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+        """
+        values = (
+            student.roll_number,
+            student.name,
+            student.dob,
+            student.program,
+            student.branch,
+            student.batch,
+            student.semester,
+            student.mobile_no,
+            student.email_id
+        )
+        self.cursor.execute(query, values)
+        self.conn.commit()
+
+    def read(self):
+        query = "SELECT * FROM students;"
+        self.cursor.execute(query)
+        rows = self.cursor.fetchall()
+        students = []
+        for row in rows:
+            student = Student(*row)
+            students.append(student)
+        return students
+
+    def update(self, roll_number, new_student):
+        query = """
+            UPDATE students
+            SET name = %s, dob = %s, program = %s, branch = %s, batch = %s, semester = %s, mobile_no = %s, email_id = %s
+            WHERE roll_number = %s;
+        """
+        values = (
+            new_student.name,
+            new_student.dob,
+            new_student.program,
+            new_student.branch,
+            new_student.batch,
+            new_student.semester,
+            new_student.mobile_no,
+            new_student.email_id,
+            roll_number
+        )
+        self.cursor.execute(query, values)
+        self.conn.commit()
+        if self.cursor.rowcount > 0:
+            return True
+        else:
+            return False
+
+    def delete(self, roll_number):
+        query = "DELETE FROM students WHERE roll_number = %s;"
+        values = (roll_number,)
+        self.cursor.execute(query, values)
+        self.conn.commit()
+        if self.cursor.rowcount > 0:
+            return True
+        else:
+            return False
+
+if __name__ == '__main__':
+    host = 'localhost'
+    user = 'root'
+    password = 'jasgun_20'
+    database = 'students'
+    db = StudentDatabase(host, user, password, database)
+
+    
+while True:
+        print('1. Create student')
+        print('2. Read all students')
+        print('3. Update student')
+        print('4. Delete student')
+        print('5. Quit')
+
+        choice = input('Enter your choice (1-5): ')
+
+        if choice == '1':
+            roll_number = int(input('Enter roll number: '))
+            name = input('Enter name: ')
+            dob = input('Enter date of birth (YYYY-MM-DD): ')
+            program = input('Enter program: ')
+            branch = input('Enter branch: ')
+            batch = input('Enter batch: ')
+            semester = input('Enter semester: ')
+            mobile_no = input('Enter mobile number: ')
+            email_id = input('Enter email ID: ')
+
+            student = Student(roll_number, name, dob, program, branch, batch, semester, mobile_no, email_id)
+            db.create(student)
+            print('Student created successfully.')
+
+
+        elif choice == '2':
+            students = db.read()
+            print("+" + "-" * 15 + "+" + "-" * 20 + "+" + "-" * 12 + "+" + "-" * 10 + "+" + "-" * 15 + "+" + "-" * 10 + "+" + "-" * 10 + "+" + "-" * 15 + "+" + "-" * 49 + "+")
+            print("| {:<14} | {:<19} | {:<11} | {:<9} | {:<14} | {:<9} | {:<9} | {:<14} | {:<49} |".format(
+                "Roll Number", "Name", "DOB", "Program", "Branch", "Batch", "Semester", "Mobile No.", "Email ID"))
+            print("|" + "-" * 14 + "|" + "-" * 19 + "|" + "-" * 11 + "|" + "-" * 9 + "|" + "-" * 14 + "|" + "-" * 9 + "|" + "-" * 9 + "|" + "-" * 14 + "|" + "-" * 49 + "|")
+            for student in students:
+                print("| {:<14} | {:<19} | {:<11} | {:<9} | {:<14} | {:<9} | {:<9} | {:<14} | {:<49} |".format(
+                    student.roll_number, student.name, student.dob, student.program, student.branch, student.batch, student.semester, student.mobile_no, student.email_id))
+                print("+" + "-" * 14 + "+" + "-" * 19 + "+" + "-" * 11 + "+" + "-" * 9 + "+" + "-" * 14 + "+" + "-" * 9 + "+" + "-" * 9 + "+" + "-" * 14 + "+" + "-" * 49 + "+")
+
+
+
+        elif choice == '3':
+            roll_number = int(input('Enter roll number: '))
+            name = input('Enter name: ')
+            dob = input('Enter date of birth (YYYY-MM-DD): ')
+            program = input('Enter program: ')
+            branch = input('Enter branch: ')
+            batch = input('Enter batch: ')
+            semester = input('Enter semester: ')
+            mobile_no = input('Enter mobile number: ')
+            email_id = input('Enter email ID: ')
+
+            student = Student(roll_number, name, dob, program, branch, batch, semester, mobile_no, email_id)
+            if db.update(roll_number, student):
+                print('Student updated successfully.')
+            else:
+                print('Student not found.')
+
+        elif choice == '4':
+            roll_number = int(input('Enter roll number: '))
+            if db.delete(roll_number):
+                print('Student not found.')
+                
+        elif choice == '5':
+            print('Exiting...')
+            break
+
+        else:
+            print('Invalid choice. Please try again.')
+
+
+import mysql.connector
+
+class CourseDatabase:
+    def __init__(self, host, user, password, database):
+        self.db = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="jasgun_20",
+            database="student" 
+        )
+        self.cursor = self.db.cursor()
+
+    def create(self, course_name, course_code, branch, batch, semester):
+        sql = "INSERT INTO course_record (course_name, course_code, branch, batch, semester) VALUES (%s, %s, %s, %s, %s)"
+        values = (course_name, course_code, branch, batch, semester)
+        self.cursor.execute(sql, values)
+        self.db.commit()
+
+    def read(self, course_name):
+        sql = "SELECT * FROM course_record WHERE course_name = %s"
+        values = (course_name,)
+        self.cursor.execute(sql, values)
+        result = self.cursor.fetchone()
+        if result:
+            course_record = {
+                "course_name": result[0],
+                "course_code": result[1],
+                "branch": result[2],
+                "batch": result[3],
+                "semester": result[4]
+            }
+            return course_record
+        else:
+            return None
+
+    def update(self, course_name, course_code, branch, batch, semester):
+        sql = "UPDATE course_record SET course_code = %s, branch = %s, batch = %s, semester = %s WHERE course_name = %s"
+        values = (course_code, branch, batch, semester, course_name)
+        self.cursor.execute(sql, values)
+        self.db.commit()
+        if self.cursor.rowcount > 0:
+            return True
+        else:
+            return False
+
+    def delete(self, course_name):
+        sql = "DELETE FROM course_record WHERE course_name = %s"
+        values = (course_name,)
+        self.cursor.execute(sql, values)
+        self.db.commit()
+        if self.cursor.rowcount > 0:
+            return True
+        else:
+            return False
+
+    def close_connection(self):
+        self.db.close()
+
+
+# Connect to MySQL database
+db = CourseDatabase(host="localhost", user="root", password="jasgun_20", database="student")
+
+while True:
+    print("1.Creating Course Record")
+    print("2.Reading Course Record")
+    print("3.Updating Course Record")
+    print("4.Deleting Course Record")
+    print("5.Quit")
+    choice = int(input("Enter your choice : "))
+    if choice==1:
+        # Create Course Record
+        course_name = input("Enter the course name: ")
+        course_code = input("Enter the course code: ")
+        branch = input("Enter the branch: ")
+        batch = input("Enter the batch: ")
+        semester = input("Enter the semester: ")
+        db.create(course_name, course_code, branch, batch, semester)              
+        print("Record has been created" )
+        
+    elif choice==2:
+        # Read Course Record
+        course_name = input("Enter the course name to read: ")
+        s2 = db.read(course_name)
+        if s2:
+            print("Course name:", s2["course_name"])
+            print("Course code:", s2["course_code"])
+            print("Branch:", s2["branch"])
+            print("Batch:", s2["batch"])
+            print("Semester:", s2["semester"])
+        else :
+            print("Record no longer exists")
+    
+
+    
+    elif choice==3:
+        # Update Course Record
+        course_name = input("Enter the course name to update: ")
+        course_code = input("Enter the new course code: ")
+        branch = input("Enter the new branch: ")
+        batch = input("Enter the new batch: ")
+        semester = input("Enter the new semester: ")
+        updated = db.update(course_name, course_code, branch, batch, semester)
+        if updated:
+            print("Course record updated successfully.")
+        else:
+            print("Course record not found.")
+            
+       # Delete Course Record         
+    elif choice==4:
+        course_name = input("Enter the course name to delete: ")
+        deleted = db.delete(course_name)
+        if deleted:
+         print("Course record deleted successfully.")
+        else:
+         print("Course record not found.")
+
+    elif choice == 5:
+            # Quit the program
+            break
+            
+    else:
+        print("Invalid input")
+    
+    # Ask the user if they want to continue or not
+    c = input("Do you want to continue? (y/n): ")
+    if c.lower() == 'n':
+        break
+
+
+import mysql.connector
+
+class ExamDatabase:
+    def __init__(self, host, user, password, database):
+        self.db = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="jasgun_20",
+            database="student" 
+        )
+        self.cursor = self.db.cursor()
+
+    def create(self, student_name, roll_number, course_name, branch, batch, semester, exam_type, st_status):
+        sql = "INSERT INTO exam_record (student_name, roll_number, course_name, branch, batch, semester, exam_type, st_status) VALUES (%s, %s, %s,%s, %s, %s, %s, %s)"
+        values = (student_name, roll_number, course_name, branch, batch, semester, exam_type, st_status)
+        self.cursor.execute(sql, values)
+        self.db.commit()
+
+    def read(self, course_name):
+        sql = "SELECT * FROM exam_record WHERE course_name = %s"
+        values = (course_name,)
+        self.cursor.execute(sql, values)
+        result = self.cursor.fetchone()
+        if result:
+            course_record = {
+                "student_name": result[0],
+                "roll_number": result[1],
+                "course_name": result[2],
+                "branch": result[3],
+                "batch": result[4],
+                "semester": result[5],
+                "exam_type": result[6],
+                "st_status": result[7]
+            }
+            return exam_record
+        else:
+            return None
+
+    def update(self, student_name, roll_number, course_name, branch, batch, semester, exam_type, st_status):
+        sql = "UPDATE exam_record SET student_name  = %s, roll_number= %s,branch= %s, batch= %s, semester= %s, exam_type= %s, st_status= %s WHERE course_name = %s"
+        values = (student_name, roll_number, branch, batch, semester, exam_type, st_status, course_name)
+        self.cursor.execute(sql, values)
+        self.db.commit()
+        if self.cursor.rowcount > 0:
+            return True
+        else:
+            return False
+
+    def delete(self, course_name):
+        sql = "DELETE FROM exam_record WHERE course_name = %s"
+        values = (course_name,)
+        self.cursor.execute(sql, values)
+        self.db.commit()
+        if self.cursor.rowcount > 0:
+            return True
+        else:
+            return False
+ 
+
+
+    def close_connection(self):
+        self.db.close()
+
+
+# Connect to MySQL database
+db = ExamDatabase(host="localhost", user="root", password="jasgun_20", database="student")
+
+while True:
+    print("1.Creating Exam Record")
+    print("2.Reading Exam Record")
+    print("3.Updating Exam Record")
+    print("4.Deleting Exam Record")
+    print("5.Quit")
+    choice = int(input("Enter your choice : "))
+    if choice==1:
+        # Create Course Record
+        # Create Exam Record
+        student_name = input("Enter the student's name: ")
+        roll_number = input("Enter the enrollment number: ")
+        course_name = input("Enter the course name: ")
+        branch = input("Enter the branch: ")
+        batch = input("Enter the batch: ")
+        semester = input("Enter the semester: ")
+        exam_type = input("Enter the type of the exam(Mid term / End term): ")
+        st_status = input("Enter the status of the student in exam(a for absebt/ p for present): ")
+        db.create(student_name,roll_number, course_name, branch, batch, semester, exam_type, st_status)              
+        print("Record has been created" )
+        
+        
+    elif choice==2:
+        # Read Course Record
+        course_name = input("Enter the course name to read: ")
+        s2 = db.read(course_name)
+        if s2:
+            print("Course name:", s2["course_name"])
+            print("Course code:", s2["course_code"])
+            print("Branch:", s2["branch"])
+            print("Batch:", s2["batch"])
+            print("Semester:", s2["semester"])
+        else :
+            print("Record no longer exists")
+    
+
+    
+    elif choice==3:
+        # Update Course Record
+        course_name = input("Enter the course name to update: ")
+        course_code = input("Enter the new course code: ")
+        branch = input("Enter the new branch: ")
+        batch = input("Enter the new batch: ")
+        semester = input("Enter the new semester: ")
+        updated = db.update(course_name, course_code, branch, batch, semester)
+        if updated:
+            print("Course record updated successfully.")
+        else:
+            print("Course record not found.")
+            
+       # Delete Course Record         
+    elif choice==4:
+        course_name = input("Enter the course name to delete: ")
+        deleted = db.delete(course_name)
+        if deleted:
+         print("Course record deleted successfully.")
+        else:
+         print("Course record not found.")
+
+    elif choice == 5:
+            # Quit the program
+            break
+            
+    else:
+        print("Invalid input")
+    
+    # Ask the user if they want to continue or not
+    c = input("Do you want to continue? (y/n): ")
+    if c.lower() == 'n':
+        break
+
+
+    
+
+
+
+
+
+#COURSE ASSIGNMENT
+import mysql.connector as sql
+
+con=sql.connect(host="localhost",user="root",passwd="jasgun_20", database="student")
+cursor=con.cursor()
+
+
+
+roll_no=int(input("Enter your roll number:"))
+branch=input("Enter your branch:")
+batch=int(input("Enter your batch:"))
+sem=int(input("Enter your semester:"))
+
+while True:
+
+    print("Course Assignment")
+    print("Choose required function to be performed")
+    print("1.Assign a course")
+    print("2.Assign all courses")
+    print("3.Verify if course is assigned")
+    print("4.Exit window")
+    choice_c=int(input("Enter your choice:"))
+    print("Here are your course details")
+
+
+
+    
+    if choice_c==1:
+            cursor.execute("select course_code,course_name from course_eceai")
+            data=cursor.fetchone()
+            for i in data:
+                print(i)
+
+
+    elif choice_c==2:
+        cursor.execute("select course_code,course_name from course_eceai")
+        data2=cursor.fetchall()
+        for i in data2:
+            print("your subject details:",i)
+
+    elif  choice_c==3:
+        if con.is_connected()==True:
+            print("Successfully Assigned course")
+        else:
+            print("Incorrect Credentials")
+
+    elif choice_c==4:
+        break
+    
+
+
+#ASSIGNING EXAM TO COURSE
+
+import mysql.connector as sql
+
+con=sql.connect(host="localhost",user="root",passwd="jasgun_20", database="student")
+cursor=con.cursor()
+
+
+
+roll_no=int(input("Enter your roll number:"))
+branch=input("Enter your course:")
+
+
+while True:
+
+    print("Course Assignment")
+    print("Choose required function to be performed")
+    print("1.Assign an exam to a course")
+    print("2.Assign all exams to a course")
+    print("3.Verify if an exam is assigned")
+    print("4.Exit window")
+    choice_c=int(input("Enter your choice:"))
+
+    
+    if choice_c==1:
+            cursor.execute("select course_code,examtype,examdate from mt_eceai")
+            data=cursor.fetchone()
+            print("Here are your exam details for a course")
+            for i in data:
+                print(i)
+
+
+    elif choice_c==2:
+        print("you can choose which exam you want to be assigned:")
+        print("1.Mid Term Exam")
+        print("2.End Term Exam")
+        ch=int(input("Enter your choice"))
+
+        if ch==1:
+            cursor.execute("select course_code,examtype,examdate from mt_eceai")
+            data2=cursor.fetchone()
+            for i in data2:
+                print("your exam details:",i)
+
+
+        if ch==2:
+            cursor.execute("select course_code,examtype,examdate from et_eceai")
+            data3=cursor.fetchone()
+            for i in data3:
+                print("your exam details:",i)
+
+    elif  choice_c==3:
+        if con.is_connected()==True:
+            print("Successfully Assigned exam to course")
+        else:
+            print("Incorrect Credentials")
+
+    elif choice_c==4:
+        break
+
+
+
+import mysql.connector
+
+# Connect to the MySQL database
+mydb = mysql.connector.connect(
+  host="localhost",
+  user="root",
+  password="jasgun_20",
+  database="student"
+)
+
+
+
+# Create a cursor object to execute SQL queries
+mycursor = mydb.cursor()
+
+# Create the examscorecard table if it doesn't exist
+mycursor.execute("CREATE TABLE IF NOT EXISTS examscorecard (id INT AUTO_INCREMENT PRIMARY KEY,roll_number INT , name VARCHAR(255), bee_mt INT, cs_mt INT, cprog_mt INT, ae_mt INT, is_mt INT, am_mt INT ,bee_et INT, cs_et INT, cprog_et INT, ae_et INT, is_et INT, am_et INT)")
+
+# Function to create a scorecard for one student with 6 subjects
+def create_scorecard():
+    name = input("Enter student name: ")
+    roll_number = int(input("Enter enrollment number:"))
+    bee_mt = int(input("Enter BEE MidTerm score: "))
+    cs_mt = int(input("Enter CS MidTerm score: "))
+    cprog_mt = int(input("Enter C Programming MidTerm score: "))
+    ae_mt = int(input("Enter AE MidTerm score: "))
+    is_mt = int(input("Enter IS MidTerm score: "))
+    am_mt = int(input("Enter AM MidTerm score: "))
+    bee_et = int(input("Enter BEE EndTerm score: "))
+    cs_et = int(input("Enter CS EndTerm score: "))
+    cprog_et = int(input("Enter C Programming EndTerm score: "))
+    ae_et = int(input("Enter AE EndTerm score: "))
+    is_et = int(input("Enter IS EndTerm score: "))
+    am_et = int(input("Enter AM EndTerm score: "))
+    sql = "INSERT INTO examscorecard (name,roll_number, bee_mt, cs_mt, cprog_mt, ae_mt ,is_mt, am_mt,bee_et, cs_et, cprog_et, ae_et, is_et, am_et) VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+
+    val = (name,roll_number, bee_mt, cs_mt, cprog_mt, ae_mt, is_mt, am_mt,bee_et, cs_et, cprog_et, ae_et, is_et, am_et)
+    mycursor.execute(sql, val)
+    mydb.commit()
+    print("Scorecard added successfully!")
+
+# Function to read a scorecard for one student with 6 subjects
+def read_scorecard():
+    id = int(input("Enter scorecard ID: "))
+    sql = "SELECT * FROM examscorecard WHERE id = %s"
+    val = (id,)
+    mycursor.execute(sql, val)
+    result = mycursor.fetchone()
+    if result is None:
+        print("No scorecard found for ID", id)
+    else:
+        print("ID:", result[0])
+        print("Roll Number:", result[2])
+        print("Name:", result[1])
+        print("BEE (MT):", result[3])
+        print("CS (MT):", result[4])
+        print("C Programming (MT):", result[5])
+        print("AE (MT):", result[6])
+        print("IS (MT):", result[7])
+        print("AM (MT):", result[8])
+        print("BEE (ET):", result[9])
+        print("CS (ET):", result[10])
+        print("C Programming (ET):", result[11])
+        print("AE (ET):", result[12])
+        print("IS (ET):", result[13])
+        print("AM (ET):", result[14])
+        choice = input("Do you want to edit this scorecard? (y/n): ")
+        if choice == 'y':
+            bee_mt = int(input("Enter BEE score (MT): "))
+            cs_mt = int(input("Enter CS score (MT): "))
+            cprog_mt = int(input("Enter C Programming score (MT): "))
+            ae_mt = int(input("Enter AE score (MT): "))
+            is_mt = int(input("Enter IS score (MT): "))
+            am_mt = int(input("Enter AM score (MT): "))
+            bee_et = int(input("Enter BEE score (ET): "))
+            cs_et = int(input("Enter CS score (ET): "))
+            cprog_et = int(input("Enter C Programming score (ET): "))
+            ae_et = int(input("Enter AE score (ET): "))
+            is_et = int(input("Enter IS score (ET): "))
+            am_et = int(input("Enter AM score (ET): "))
+            sql = "UPDATE examscorecard SET bee_mt = %s, cs_mt = %s, cprog_mt = %s, ae_mt = %s, is_mt = %s, am_mt = %s, bee_et = %s, cs_et = %s, cprog_et = %s, ae_et = %s, is_et = %s, am_et = %s WHERE id = %s"
+            val = (bee_mt, cs_mt, cprog_mt, ae_mt, is_mt, am_mt, bee_et, cs_et, cprog_et, ae_et, is_et, am_et, id)
+            mycursor.execute(sql, val)
+            mydb.commit()
+            print("Scorecard updated successfully!")
+        else:
+            print("Scorecard not updated.")
+
+
+
+
+
+
+# Function to update a scorecard for one student with 6 subjects
+def update_scorecard():
+    name = input("Enter student name: ")
+    bee = int(input("Enter BEE score: "))
+    cs = int(input("Enter CS score: "))
+    cprog = int(input("Enter C Programming score: "))
+    ae = int(input("Enter AE score: "))
+    iscore = int(input("Enter IS score: "))
+    am = int(input("Enter AM score: "))
+    sql = "UPDATE examscorecard SET bee = %s, cs = %s, cprog = %s, ae = %s, iscore = %s, am = %s WHERE name = %s"
+    val = (bee, cs, cprog, ae, iscore, am, name)
+    mycursor.execute(sql, val)
+    mydb.commit()
+    print(mycursor.rowcount, "record(s) updated")
+
+# Function to delete a scorecard for one student with 6 subjects
+def delete_scorecard():
+    name = input("Enter student name: ")
+    sql = "DELETE FROM examscorecard WHERE name = %s"
+    val = (name,)
+    mycursor.execute(sql, val)
+    mydb.commit()
+    print(mycursor.rowcount, "record(s) deleted")
+    mydb.close()
+
+
+# Call the appropriate functions
+
+if __name__ == '__main__':
+    while True:
+        print("Select an option:")
+        print("1. Create scorecard")
+        print("2. Read scorecard")
+        print("3. Update scorecard")
+        print("4. Delete scorecard")
+        print("5. Exit")
+        choice = int(input("Enter your choice: "))
+        if choice == 1:
+            create_scorecard()
+        elif choice == 2:
+            read_scorecard()
+        elif choice == 3:
+            update_scorecard()
+        elif choice == 4:
+            delete_scorecard()
+        elif choice == 5:
+            print("Exiting...")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+
+#MIDSEM PIE CHART
+import matplotlib.pyplot as plt
+# sample data
+labels = ['BEE', 'CS', 'CPROG', 'AE', 'IS', 'AM']
+sizes = [25, 25, 25, 25, 25, 25]
+colors = ['red', 'green', 'blue', 'yellow', 'brown', 'pink']
+
+# create a pie chart
+plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90)
+
+# add title
+plt.title("Pie Chart for midsem ")
+
+# display the chart
+plt.show()
+
+
+
+
+#ENDSEM PIE CHART
+
+import matplotlib.pyplot as plt
+
+# sample data
+labels = ['BEE', 'CS', 'CPROG', 'AE', 'IS', 'AM']
+sizes = [55, 55, 55, 55, 55, 55]
+colors = ['red', 'green', 'blue', 'yellow', 'brown', 'pink']
+
+# create a pie chart
+plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90)
+
+# add title
+plt.title("Pie Chart for endsem ")
+
+# display the chart
+plt.show()
+
+
+import matplotlib.pyplot as plt
+
+# sample data
+x = ['BEE', 'CS', 'CPROG', 'AE', 'IS', 'AM']
+y = [89, 75 , 92, 95 , 79 , 80]
+
+# create a bar graph
+plt.bar(x, y)
+
+# add labels and title
+plt.xlabel("Course Name")
+plt.ylabel("Average Marks Out of 100")
+plt.title(" Bar graph for average marks")
+
+# display the graph
+plt.show()
+
+
+
+import mysql.connector
+con=mysql.connector.connect(host="localhost",user="root",passwd="jasgun_20", database="student")
+cursor=con.cursor()
+
+
+
+roll_no=int(input("Enter your roll number:"))
+branch=input("Enter your branch:")
+batch=int(input("Enter your batch:"))
+sem=int(input("Enter your semester:"))
+
+
+while True:
+    print("Exam Result")
+    print("Choose required function to be performed")
+    print("1.Display Total marks (out of 600)")
+    print("2.Display Exam scores individually")
+    print("3.Exit window")
+    choice_c=int(input("Enter your choice:"))
+    
+    if choice_c==1:
+        cursor.execute("SELECT SUM(marks_obtained) FROM student_marks")
+        data=cursor.fetchone()
+        print("Your marks for the semester:", data[0])
+        per=(data[0]/600)*100
+        print("Your percentage is:", per)
+
+    elif choice_c==2:
+        cursor.execute("SELECT course_code, course_name, marks_obtained FROM student_marks")
+        data2=cursor.fetchall()
+        for i in data2:
+            print("Marks for the subject:", i)
+
+    elif choice_c==3:
+        break
+
+
+import mysql.connector as sql
+
+con = sql.connect(host="localhost", user="root", passwd="jasgun_20", database="student")
+cursor = con.cursor()
+
+while True:
+    print("COURSE WISE RESULT")
+    print("Choose required function to be performed")
+    print("1.Total number of students in course")
+    print("2.Course's average marks and percentage")
+    print("3.Course's all over exam scores")
+    print("4.Exit window")
+    choice_c = int(input("Enter your choice:"))
+
+    if choice_c == 1:
+        cursor.execute("SELECT COUNT(*) FROM marks_cs")
+        count = cursor.fetchone()[0]
+        print("The number of students enrolled in this course is:", count)
+
+    elif choice_c == 2:
+        cursor.execute("SELECT AVG(obtainedmarks_cs), MAX(maxmarks_cs) FROM marks_cs")
+        data = cursor.fetchone()
+        avg_marks = data[0]
+        max_marks = data[1]
+        avg_percentage = (avg_marks / max_marks) * 100
+        print("Average marks of students:", avg_marks)
+        print("Average percentage is", avg_percentage, "%")
+        cursor.fetchall() # Fetch the unread result
+
+    elif choice_c == 3:
+        cursor.execute("SELECT roll_number, student_name, obtainedmarks_cs FROM marks_cs")
+        data = cursor.fetchall()
+        print("Here are your details: ")
+        for row in data:
+            print(row)
+
+    elif choice_c == 4:
+        break
+
+
+
+
+import mysql.connector as sql
+
+# Connect to the database
+con = sql.connect(host="localhost", user="root", passwd="jasgun_20", database="student")
+cursor = con.cursor()
+
+while True:
+    print("OVERALL RESULT")
+    print("Choose required function to be performed")
+    print("1. Total number of students")
+    print("2. Overall average marks and percentage")
+    print("3. Overall exam scores")
+    print("4. Exit window")
+    choice_c = int(input("Enter your choice: "))
+
+    if choice_c == 1:
+        cursor.execute("SELECT COUNT(*) FROM finalscores")
+        count = cursor.fetchone()[0]
+        print("Total number of students enrolled:", count)
+
+    elif choice_c == 2:
+        cursor.execute("SELECT SUM(marks_obtained) FROM finalscores")
+        count=3
+        total_marks = cursor.fetchone()[0]
+        print("Total marks obtained by all students:", total_marks)
+        if count > 0:
+            avg_marks = total_marks / count
+            print("Average marks of students:", avg_marks)
+            per = (total_marks / 18)
+            print("Percentage is", per, "%")
+        else:
+            print("No students enrolled yet.")
+
+    elif choice_c == 3:
+        cursor.execute("SELECT roll_number, student_name, marks_obtained FROM finalscores")
+        data2 = cursor.fetchall()
+        print("Here are your marks details:")
+        for row in data2:
+            print(row)
+
+    elif choice_c == 4:
+        break
+
+# Close the cursor and database connection
+cursor.close()
+con.close()
